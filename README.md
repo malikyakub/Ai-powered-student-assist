@@ -1,4 +1,4 @@
-"# Ai-powered-student-assist" 
+### Ai-powered-student-assist" 
 
 <ol>
   <li>malik yakub sharif</li>
