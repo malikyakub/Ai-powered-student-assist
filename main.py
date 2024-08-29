@@ -161,20 +161,20 @@ class App(ctk.CTk):
         loading_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
         
         def generate_response():
-            while True:
-                try:
-                    response = model.generate_content(user_prompt)
-                    self.after(0, lambda: self.update_response(loading_label, response.text))
-                    break
-                except Exception as e:
-                    error_message = f"Error: {str(e)} \n \nSuggestion: Wait for 2 seconds then try again"
-                    self.after(0, lambda: loading_label.configure(text=error_message))
-                    time.sleep(2)
+            try:
+                response = model.generate_content(user_prompt)
+                self.after(0, lambda: self.update_response(loading_label, response.text))
+            except Exception as e:
+                error_message = f"Error: {str(e)} \n \nSuggestion: Wait for 2 seconds then try again"
+                self.after(0, lambda: loading_label.configure(text=error_message))
+                time.sleep(2)
         
         threading.Thread(target=generate_response).start()
 
     def update_response(self, loading_label, response_text):
         loading_label.configure(text=response_text)
+        self.message_entry.configure(state="disabled")
+        self.send_button.configure(state="disabled")
 
 app = App()
 app.mainloop()
