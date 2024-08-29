@@ -6,8 +6,11 @@ import time
 import os
 import google.generativeai as genai
 import threading
+from dotenv import load_dotenv
 
-genai.configure(api_key=os.environ.get("gemini_API"))
+load_dotenv()
+
+genai.configure(api_key=os.getenv("gemini_API"))
 
 class App(ctk.CTk):
     def __init__(self):
