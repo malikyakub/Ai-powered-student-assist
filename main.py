@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key="AIzaSyDdn7efZfy9SLq0h6aQZ-bsBlOdCu3tG6c")
+GM_API = os.getenv("GM_API")
+genai.configure(api_key=GM_API)
 
 class App(ctk.CTk):
     def __init__(self):
