@@ -83,14 +83,9 @@ class App(ctk.CTk):
         self.user_interest = ''
 
         self.math_result = 0
-        self.english_result = 0
-        self.islamic_studies_result = 0
         self.physics_result = 0
         self.biology_result = 0
         self.chemistry_result = 0
-        self.geography_result = 0
-        self.history_result = 0
-        self.somali_result = 0
         self.interest_result = ''
 
     def show_welcome_message(self):
