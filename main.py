@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("gemini_API"))
+genai.configure(api_key="AIzaSyDdn7efZfy9SLq0h6aQZ-bsBlOdCu3tG6c")
 
 class App(ctk.CTk):
     def __init__(self):
@@ -167,14 +167,14 @@ class App(ctk.CTk):
             except Exception as e:
                 error_message = f"Error: {str(e)} \n \nSuggestion: Wait for 2 seconds then try again"
                 self.after(0, lambda: loading_label.configure(text=error_message))
+                self.message_entry.configure(state="disabled")
+                self.send_button.configure(state="disabled")
                 time.sleep(2)
         
         threading.Thread(target=generate_response).start()
 
     def update_response(self, loading_label, response_text):
         loading_label.configure(text=response_text)
-        self.message_entry.configure(state="disabled")
-        self.send_button.configure(state="disabled")
 
 app = App()
 app.mainloop()
