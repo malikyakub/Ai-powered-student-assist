@@ -10,8 +10,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GM_API = os.getenv("GM_API")
-genai.configure(api_key=GM_API)
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+generation_config = {
+    "temperature": 2,
+    "top_p": 0.95,
+    "top_k": 64,
+    "max_output_tokens": 8192,
+    "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    generation_config=generation_config,
+    system_instruction="you are a student assistant you assist them to choose their university education filed based on their intrest and the subjects they are good at, you recommend only five facults in ordered list and no explanation necessary and incase the student asks why you just tell him the bond between what he is good at and each facult don't explain the faculties",
+)
+
+chat_session = model.start_chat(history=[])
 
 class App(ctk.CTk):
     def __init__(self):
@@ -55,7 +70,7 @@ class App(ctk.CTk):
         self.scrollable_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="#343541")
         self.scrollable_frame.pack(side="top", fill="both", expand=True, padx=15, pady=15)
 
-        self.welcome_label = ctk.CTkLabel(self.scrollable_frame, text="Hello there! I'm here to help you find the right faculty based on your interests and strengths.", fg_color="#444654", corner_radius=8, wraplength=500, justify="left", padx=8, pady=8, font=("Arial", 12))
+        self.welcome_label = ctk.CTkLabel(self.scrollable_frame, text="Hello there! I'm here to help you find the right faculty based on your interests and strengths.", fg_color="#444654", corner_radius=8, justify="left", padx=8, pady=8, font=("Arial", 12), wraplength=350)
         self.welcome_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
 
         self.message_frame = ctk.CTkFrame(self.main_frame, fg_color="#343541", height=80)
@@ -75,10 +90,16 @@ class App(ctk.CTk):
 
         self.questions = [
             "What is your math results?",
-            "What are your physics results?",
-            "What are your biology results?",
-            "What are your chemistry results?",
-            "What do you interest in?"
+            "What is your physics results?",
+            "What is your biology results?",
+            "What is your chemistry results?",
+            # "What is your English language results?",
+            # "What is your Somali language results?",
+            # "What is your Islamic studies results?",
+            # "What is your Geography results?",
+            # "What is your History results?",
+            # "What is your Quran results?",
+            "What do you interest in and ever dreamed to be in the future?"
         ]
         self.current_question = 0
         self.user_answers = {}
@@ -112,12 +133,12 @@ class App(ctk.CTk):
                     self.current_question += 1
                     self.after(1000, self.show_next_question)
                 except ValueError:
-                    error_message = "Please enter a valid number for your result."
-                    messagebox.showerror("Error", error_message)
+                    messagebox.showinfo("Error", "Don't be stupid")
             else:
                 if not user_message:
-                    error_message = "Please enter your interest."
-                    messagebox.showerror("Error", error_message)
+                    messagebox.showinfo("Error", "Don't be stupid")
+                elif user_message.isdigit():
+                    messagebox.showinfo("Error", "Don't be stupid")
                 else:
                     self.user_interest = user_message
                     user_label = self.create_message_label(user_message, is_user=True)
@@ -130,7 +151,7 @@ class App(ctk.CTk):
         new_question_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
 
     def create_message_label(self, text, is_user=False):
-        return ctk.CTkLabel(self.scrollable_frame, text=text, fg_color="#444654", corner_radius=8, wraplength=500, justify="left", padx=8, pady=8, font=("Arial", 12))
+        return ctk.CTkLabel(self.scrollable_frame, text=text, fg_color="#444654", corner_radius=8, justify="left", padx=8, pady=8, font=("Arial", 12), wraplength=350)
 
     def calculate_good_at(self):
         subject_scores = {
@@ -142,29 +163,43 @@ class App(ctk.CTk):
             "Chemistry": self.user_answers.get("What are your chemistry results?", 0),
             "Geography": self.user_answers.get("What are your geography results?", 0),
             "History": self.user_answers.get("What are your history results?", 0),
-            "Somali": self.user_answers.get("What are your Somali language results?", 0)
+            "Somali": self.user_answers.get("What are your Somali language results?", 0),
+            "Quran": self.user_answers.get("What are your Quran results?", 0)
         }
         self.Good_At = max(subject_scores, key=subject_scores.get)
         self.highest_score = subject_scores[self.Good_At]
         self.user_prompt()
-
     def user_prompt(self):
-        user_prompt = f"Based on the student who has {self.highest_score} in {self.Good_At} as the highest score and their expressed interest in {self.user_interest}, please recommend 5 suitable faculties or academic programs. Format your response as a numbered list from 1 to 5, without any additional explanations."
-        generation_config = {
-            "temperature": 1,
-            "top_p": 0.95,
-            "top_k": 64,
-            "max_output_tokens": 256,
-        }
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest", generation_config=generation_config)
+        user_prompt = f"Hey there! I'm a student who got {self.highest_score} in {self.Good_At}, which is my best subject. I'm really into {self.user_interest} too. Can you suggest 5 cool faculties or programs that might be a good fit for me? Just list them from 1 to 5, no need for extra explanations. Thanks!"
+        
+        intro_message = f"Here are faculties that can use your strength in {self.Good_At} and your high interest in being a {self.user_interest}:"
+        intro_label = self.create_message_label(intro_message, is_user=False)
+        intro_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
         
         loading_label = self.create_message_label("Loading...", is_user=False)
         loading_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
         
         def generate_response():
             try:
-                response = model.generate_content(user_prompt)
+                response = chat_session.send_message(user_prompt)
                 self.after(0, lambda: self.update_response(loading_label, response.text))
+                
+                # Create another fake prompt from the user
+                fake_user_prompt = "Why?"
+                
+                # Send the fake user prompt to the chat session
+                fake_response = chat_session.send_message(fake_user_prompt)
+                
+                # Create a new label for the fake response
+                self.after(0, lambda: self.create_fake_response_label(fake_response.text))
+                
+                # Disable message entry and send button
+                self.message_entry.configure(state="disabled")
+                self.send_button.configure(state="disabled")
+                
+                # Create closing message
+                closing_message = "I hope you find your perfect faculty and achieve great success in your future career!"
+                self.after(0, lambda: self.create_closing_message(closing_message))
             except Exception as e:
                 error_message = f"Error: {str(e)} \n \nSuggestion: Wait for 2 seconds then try again"
                 self.after(0, lambda: loading_label.configure(text=error_message))
@@ -176,6 +211,14 @@ class App(ctk.CTk):
 
     def update_response(self, loading_label, response_text):
         loading_label.configure(text=response_text)
+
+    def create_fake_response_label(self, response_text):
+        fake_response_label = self.create_message_label(response_text, is_user=False)
+        fake_response_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
+
+    def create_closing_message(self, message):
+        closing_label = self.create_message_label(message, is_user=False)
+        closing_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
 
 app = App()
 app.mainloop()
