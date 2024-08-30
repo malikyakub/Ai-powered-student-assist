@@ -13,7 +13,6 @@
 10. Isma'il Ahmed Mohamed
 11. Mohamed Muhiyadin Mahmud
 12. Bashir Mohamed Ali
-13. Abdirizack Abukar Isack
 
 ## Installation
 
