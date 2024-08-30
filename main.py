@@ -23,7 +23,7 @@ generation_config = {
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
-    system_instruction="you are a student assistant you assist them to choose their university education filed based on their intrest and the subjects they are good at, you recommend only five facults in ordered list and no explanation necessary and incase the student asks why you just tell him the bond between what he is good at and each facult don't explain the faculties",
+    system_instruction="You are a student assistant. You assist them in choosing their university education field based on their interests and the subjects they are good at. You recommend only five faculties in an ordered list with no explanation necessary. In case the student asks why, you just tell them the connection between what they are good at and each faculty. Don't explain the faculties.",
 )
 
 chat_session = model.start_chat(history=[])
@@ -89,17 +89,11 @@ class App(ctk.CTk):
         self.after(1600, self.show_math_results_message)
 
         self.questions = [
-            "What is your math results?",
-            "What is your physics results?",
-            "What is your biology results?",
-            "What is your chemistry results?",
-            # "What is your English language results?",
-            # "What is your Somali language results?",
-            # "What is your Islamic studies results?",
-            # "What is your Geography results?",
-            # "What is your History results?",
-            # "What is your Quran results?",
-            "What do you interest in and ever dreamed to be in the future?"
+            "What is your math result?",
+            "What is your physics result?",
+            "What is your biology result?",
+            "What is your chemistry result?",
+            "What do you interest in and have ever dreamed of being in the future?"
         ]
         self.current_question = 0
         self.user_answers = {}
@@ -126,19 +120,22 @@ class App(ctk.CTk):
             if self.current_question < len(self.questions) - 1:
                 try:
                     user_score = float(user_message)
-                    self.user_answers[self.questions[self.current_question]] = user_score
-                    user_label = self.create_message_label(user_message, is_user=True)
-                    user_label.pack(pady=(0, 8), padx=(40, 40), anchor="e")
-                    self.message_entry.delete(0, 'end')
-                    self.current_question += 1
-                    self.after(1000, self.show_next_question)
+                    if 0 <= user_score <= 100:
+                        self.user_answers[self.questions[self.current_question]] = user_score
+                        user_label = self.create_message_label(user_message, is_user=True)
+                        user_label.pack(pady=(0, 8), padx=(40, 40), anchor="e")
+                        self.message_entry.delete(0, 'end')
+                        self.current_question += 1
+                        self.after(1000, self.show_next_question)
+                    else:
+                        messagebox.showinfo("Error", "Please enter a score between 0 and 100.")
                 except ValueError:
-                    messagebox.showinfo("Error", "Don't be stupid")
+                    messagebox.showinfo("Error", "Please enter a valid number.")
             else:
                 if not user_message:
-                    messagebox.showinfo("Error", "Don't be stupid")
+                    messagebox.showinfo("Error", "Please enter your interest.")
                 elif user_message.isdigit():
-                    messagebox.showinfo("Error", "Don't be stupid")
+                    messagebox.showinfo("Error", "Please enter a valid interest, not a number.")
                 else:
                     self.user_interest = user_message
                     user_label = self.create_message_label(user_message, is_user=True)
@@ -151,24 +148,26 @@ class App(ctk.CTk):
         new_question_label.pack(pady=(0, 8), padx=(40, 40), anchor="w")
 
     def create_message_label(self, text, is_user=False):
-        return ctk.CTkLabel(self.scrollable_frame, text=text, fg_color="#444654", corner_radius=8, justify="left", padx=8, pady=8, font=("Arial", 12), wraplength=350)
+        label = ctk.CTkLabel(self.scrollable_frame, text=text, fg_color="#444654", corner_radius=8, justify="left", padx=8, pady=8, font=("Arial", 12), wraplength=350)
+        return label
 
     def calculate_good_at(self):
         subject_scores = {
-            "Math": self.user_answers.get("What is your math results?", 0),
-            "English": self.user_answers.get("What are your English language results?", 0),
-            "Islamic Studies": self.user_answers.get("What are your Islamic studies results?", 0),
-            "Physics": self.user_answers.get("What are your physics results?", 0),
-            "Biology": self.user_answers.get("What are your biology results?", 0),
-            "Chemistry": self.user_answers.get("What are your chemistry results?", 0),
-            "Geography": self.user_answers.get("What are your geography results?", 0),
-            "History": self.user_answers.get("What are your history results?", 0),
-            "Somali": self.user_answers.get("What are your Somali language results?", 0),
-            "Quran": self.user_answers.get("What are your Quran results?", 0)
+            "Math": self.user_answers.get("What is your math result?", 0),
+            "English": self.user_answers.get("What is your English language result?", 0),
+            "Islamic Studies": self.user_answers.get("What is your Islamic studies result?", 0),
+            "Physics": self.user_answers.get("What is your physics result?", 0),
+            "Biology": self.user_answers.get("What is your biology result?", 0),
+            "Chemistry": self.user_answers.get("What is your chemistry result?", 0),
+            "Geography": self.user_answers.get("What is your geography result?", 0),
+            "History": self.user_answers.get("What is your history result?", 0),
+            "Somali": self.user_answers.get("What is your Somali language result?", 0),
+            "Quran": self.user_answers.get("What is your Quran result?", 0)
         }
         self.Good_At = max(subject_scores, key=subject_scores.get)
         self.highest_score = subject_scores[self.Good_At]
         self.user_prompt()
+
     def user_prompt(self):
         user_prompt = f"Hey there! I'm a student who got {self.highest_score} in {self.Good_At}, which is my best subject. I'm really into {self.user_interest} too. Can you suggest 5 cool faculties or programs that might be a good fit for me? Just list them from 1 to 5, no need for extra explanations. Thanks!"
         
@@ -184,20 +183,15 @@ class App(ctk.CTk):
                 response = chat_session.send_message(user_prompt)
                 self.after(0, lambda: self.update_response(loading_label, response.text))
                 
-                # Create another fake prompt from the user
                 fake_user_prompt = "Why?"
                 
-                # Send the fake user prompt to the chat session
                 fake_response = chat_session.send_message(fake_user_prompt)
                 
-                # Create a new label for the fake response
                 self.after(0, lambda: self.create_fake_response_label(fake_response.text))
                 
-                # Disable message entry and send button
                 self.message_entry.configure(state="disabled")
                 self.send_button.configure(state="disabled")
                 
-                # Create closing message
                 closing_message = "I hope you find your perfect faculty and achieve great success in your future career!"
                 self.after(0, lambda: self.create_closing_message(closing_message))
             except Exception as e:
@@ -206,6 +200,7 @@ class App(ctk.CTk):
                 self.message_entry.configure(state="disabled")
                 self.send_button.configure(state="disabled")
                 time.sleep(2)
+                self.after(5000, self.quit)
         
         threading.Thread(target=generate_response).start()
 
