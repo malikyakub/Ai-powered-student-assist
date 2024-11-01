@@ -43,4 +43,4 @@ The program uses the Gemini API to generate responses.
 Make sure you have an active internet connection to use the program.
 The program may not work as expected if the Gemini API is not working.
 
-<i>author: [malik yakub]([text](https://www.linkedin.com/in/malik-yakub-75778a324))</i>
+<i>author: [malik yakub](https://www.linkedin.com/in/malik-yakub-75778a324)</i>
