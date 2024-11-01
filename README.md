@@ -1,5 +1,7 @@
 # AI-Powered Student Assistant
 
+As a team we built this project to help new graduant students choose their field of study in university wisely, and this solution got the third place... 
+
 ## Team Members
 1. Malik Yakub Sharif
 2. Abdifitah Abukar Isack
@@ -40,3 +42,5 @@ python main.py
 The program uses the Gemini API to generate responses.
 Make sure you have an active internet connection to use the program.
 The program may not work as expected if the Gemini API is not working.
+
+<i>author: [malik yakub]([text](https://www.linkedin.com/in/malik-yakub-75778a324))</i>
