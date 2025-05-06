@@ -8,7 +8,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel(
-    model_name="models/learnlm-2.0-flash",
+    model_name="gemini-2.0-flash",
     system_instruction="""you a student assistant you help them pick a suitable faculty based on their strengths and interests.
 You ask them questions one by one separately.
 You first ask their GPAs in different subjects they took in school one by one.

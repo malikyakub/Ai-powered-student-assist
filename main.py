@@ -2,7 +2,7 @@ import customtkinter as ctk
 from PIL import Image
 from model import send_message_to_gemini, reset_chat_session
 from customtkinter import StringVar
-
+import re
 
 class App(ctk.CTk):
     def __init__(self):
@@ -73,7 +73,25 @@ class App(ctk.CTk):
         return self._create_message_label(text, anchor="e")
 
     def create_ai_respose_label(self, text):
-        return self._create_message_label(text, anchor="w")
+        # Split text into parts (normal text and bullet points)
+        bullet_pattern = r"\*\*([^*]+)\*\*"  # matches **bold text**
+        parts = re.split(r"(\*\*[^*]+\*\*)", text)
+
+        frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#444654", corner_radius=8)
+        frame.pack(pady=(0, 8), padx=(40, 40), anchor="w")
+
+        for part in parts:
+            if re.match(bullet_pattern, part):
+                faculty_name = re.findall(bullet_pattern, part)[0]
+                label = ctk.CTkLabel(frame, text=f"• {faculty_name}", justify="left", padx=8, pady=4,
+                                    font=("Arial", 12, "bold"), wraplength=350)
+                label.pack(anchor="w", padx=12)
+            elif part.strip():
+                label = ctk.CTkLabel(frame, text=part.strip(), justify="left", padx=8, pady=4,
+                                    font=("Arial", 12), wraplength=350)
+                label.pack(anchor="w")
+
+        return frame
 
     def _create_message_label(self, text, anchor):
         frame = ctk.CTkFrame(self.scrollable_frame, fg_color="#444654", corner_radius=8)
